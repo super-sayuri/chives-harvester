@@ -1,0 +1,85 @@
+package conf
+
+import (
+	"encoding/json"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
+)
+
+var _conf *Config
+
+type Config struct {
+	Common   *CommonConfig   `yml:"common"`
+	Template *TemplateConfig `yml:"template"`
+	Tgbot    *TgbotConfig    `yml:"tgbot"`
+	Cron     *CronConfig     `yml:"cron"`
+	Log      *LogConfig      `yml:"log"`
+	Redis    *RedisConfig    `yml:"redis"`
+}
+
+type TemplateConfig struct {
+	Crypto string `yml:"crypto"`
+}
+
+type CommonConfig struct {
+	Lang       string `yml:"lang"`
+	EncKeyPath string `yml:"encryption_key_path"`
+}
+
+type TgbotConfig struct {
+	Token string `yml:"token"`
+	Owner string `yml:"owner"`
+}
+
+type CronConfig struct {
+	Crypto string `yml:"crypto"`
+}
+
+type RedisConfig struct {
+	Nodes    string `yml:"nodes"`
+	Username string `yml:"username"`
+	Password string `yml:"password"`
+}
+
+func InitConfig(path, keyPath string) error {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	_conf = &Config{}
+	err = yaml.Unmarshal(file, _conf)
+	if err != nil {
+		return err
+	}
+
+	keys := make(map[string]string, 0)
+	file, err = ioutil.ReadFile(keyPath)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(file, &keys)
+	if err != nil {
+		return err
+	}
+	setKeyValues(_conf, keys)
+	err = logInit(_conf.Log)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
+func GetConfig() *Config {
+	return _conf
+}
+
+func setKeyValues(conf *Config, keys map[string]string) {
+	newStr, ok := keys[conf.Tgbot.Token]
+	if ok {
+		conf.Tgbot.Token = newStr
+	}
+	newStr, ok = keys[conf.Redis.Password]
+	if ok {
+		conf.Redis.Password = newStr
+	}
+}
