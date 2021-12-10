@@ -1,7 +1,8 @@
 package job
 
 import (
-	"github.com/sirupsen/logrus"
+	"context"
+	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
 	"sayuri_crypto_bot/fetcher"
 	"sayuri_crypto_bot/model"
@@ -10,9 +11,9 @@ import (
 	"time"
 )
 
-func CryptoPrice(id string) error {
-	log := logrus.WithField("jobId", id)
-	cryotpItems, err := db.GetCryptoItems()
+func CryptoPrice(ctx context.Context) error {
+	log := conf.GetLog(ctx)
+	cryotpItems, err := db.GetCryptoItems(ctx)
 	if err != nil {
 		return err
 	}
@@ -28,7 +29,7 @@ func CryptoPrice(id string) error {
 	if err != nil {
 		return err
 	}
-	groupIds, err := db.GetGroupIds()
+	groupIds, err := db.GetGroupIds(ctx)
 	if err != nil {
 		return err
 	}

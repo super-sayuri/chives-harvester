@@ -3,17 +3,18 @@ package db
 import (
 	"context"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/model"
 	"strconv"
 )
 
-func GetGroupIds() (groupIds []int64, err error) {
-	groups, err := GetRedisDb().LRange(context.Background(), "syr_groups_to_send", 0, -1).Result()
+func GetGroupIds(ctx context.Context) (groupIds []int64, err error) {
+	log := conf.GetLog(ctx)
+	groups, err := GetRedisDb().LRange(ctx, DB_KEY_GROUPS, 0, -1).Result()
 	if err != nil {
 		return
 	}
-	groupIds = make([]int64, len(groups))
+	groupIds = make([]int64, 0, len(groups))
 	for _, group := range groups {
 		id, err := strconv.Atoi(group)
 		if err != nil {
@@ -25,15 +26,16 @@ func GetGroupIds() (groupIds []int64, err error) {
 	return
 }
 
-func GetCryptoItems() ([]*model.GoodsItem, error) {
+func GetCryptoItems(ctx context.Context) ([]*model.GoodsItem, error) {
+	log := conf.GetLog(ctx)
 	rdb := GetRedisDb()
-	cryptoDb, err := rdb.HGetAll(context.Background(), "syr_crypto").Result()
+	cryptoDb, err := rdb.HGetAll(ctx, DB_KEY_CRYPTO_ITEMS).Result()
 	if err != nil {
 		return nil, err
 	}
 	var cryptoItems []*model.GoodsItem
 	for _, itemStr := range cryptoDb {
-		var item *model.GoodsItem
+		item := &model.GoodsItem{}
 		err = json.Unmarshal([]byte(itemStr), item)
 		if err != nil {
 			log.Error("cannot marshal item json ", err)

@@ -78,6 +78,10 @@ func setKeyValues(conf *Config, keys map[string]string) {
 	if ok {
 		conf.Tgbot.Token = newStr
 	}
+	newStr, ok = keys[conf.Tgbot.Owner]
+	if ok {
+		conf.Tgbot.Owner = newStr
+	}
 	newStr, ok = keys[conf.Redis.Password]
 	if ok {
 		conf.Redis.Password = newStr

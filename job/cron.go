@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
@@ -15,12 +16,13 @@ func CronInit() {
 	c.Start()
 }
 
-func WrapFunc(f func(id string) error, name string) func() {
+func WrapFunc(f func(context.Context) error, name string) func() {
 	return func() {
 		id := uuid.NewString()
 		log.Info("Start Job '", name, "'. ID: #", id)
 		defer log.Info("End Job #", id)
-		err := f(id)
+		ctx := context.WithValue(context.Background(), conf.LOG_KEY_LOG_ID, id)
+		err := f(ctx)
 		if err != nil {
 			log.Error("Job #", id, " throw an error: ", err)
 		}

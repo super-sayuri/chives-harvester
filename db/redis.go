@@ -4,25 +4,16 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"sayuri_crypto_bot/conf"
-	"strings"
 )
 
-func Init(config *conf.Config) error {
-	err := redisInit(config.Redis)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 var (
-	_redis *redis.ClusterClient
+	_redis *redis.Client
 )
 
 func redisInit(config *conf.RedisConfig) error {
 
-	_redis = redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    strings.Split(config.Nodes, ","),
+	_redis = redis.NewClient(&redis.Options{
+		Addr:     config.Nodes,
 		Username: config.Username,
 		Password: config.Password,
 	})
@@ -33,6 +24,6 @@ func redisInit(config *conf.RedisConfig) error {
 	return nil
 }
 
-func GetRedisDb() *redis.ClusterClient {
+func GetRedisDb() *redis.Client {
 	return _redis
 }

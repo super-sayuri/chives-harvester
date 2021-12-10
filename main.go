@@ -42,7 +42,6 @@ func main() {
 		log.Fatal("error when init db: ", err)
 	}
 
-	// TEST
 	job.CronInit()
 	sender.TgStartMessage(conf.GetConfig().Tgbot.Owner)
 	for {
