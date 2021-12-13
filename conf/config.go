@@ -15,6 +15,7 @@ type Config struct {
 	Cron     *CronConfig     `yml:"cron"`
 	Log      *LogConfig      `yml:"log"`
 	Redis    *RedisConfig    `yml:"redis"`
+	Service  *ServiceConfig  `yml:"service"`
 }
 
 type TemplateConfig struct {
@@ -24,6 +25,7 @@ type TemplateConfig struct {
 type CommonConfig struct {
 	Lang       string `yml:"lang"`
 	EncKeyPath string `yml:"encryption_key_path"`
+	ConfigType string `yml:"config_type"`
 }
 
 type TgbotConfig struct {
@@ -41,6 +43,11 @@ type RedisConfig struct {
 	Password string `yml:"password"`
 }
 
+type ServiceConfig struct {
+	Port    string `yml:"port"`
+	GinMode string `yml:"gin_mode"`
+}
+
 func InitConfig(path, keyPath string) error {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -51,9 +58,21 @@ func InitConfig(path, keyPath string) error {
 	if err != nil {
 		return err
 	}
+	if _conf.Common.ConfigType == "file" {
+		return configFromFile(keyPath)
+	} else {
+		return configFromFile(keyPath)
+	}
+}
+
+func GetConfig() *Config {
+	return _conf
+}
+
+func configFromFile(keyPath string) error {
 
 	keys := make(map[string]string, 0)
-	file, err = ioutil.ReadFile(keyPath)
+	file, err := ioutil.ReadFile(keyPath)
 	if err != nil {
 		return err
 	}
@@ -67,10 +86,7 @@ func InitConfig(path, keyPath string) error {
 		return nil
 	}
 	return nil
-}
 
-func GetConfig() *Config {
-	return _conf
 }
 
 func setKeyValues(conf *Config, keys map[string]string) {

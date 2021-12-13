@@ -21,7 +21,7 @@ func WrapFunc(f func(context.Context) error, name string) func() {
 		id := uuid.NewString()
 		log.Info("Start Job '", name, "'. ID: #", id)
 		defer log.Info("End Job #", id)
-		ctx := context.WithValue(context.Background(), conf.LOG_KEY_LOG_ID, id)
+		ctx := context.WithValue(context.Background(), conf.LOG_KEY_JOB_ID, id)
 		err := f(ctx)
 		if err != nil {
 			log.Error("Job #", id, " throw an error: ", err)

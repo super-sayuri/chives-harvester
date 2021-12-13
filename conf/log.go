@@ -14,7 +14,7 @@ type LogConfig struct {
 }
 
 const (
-	LOG_KEY_LOG_ID     = "logId"
+	LOG_KEY_JOB_ID     = "bId"
 	LOG_KEY_REQUEST_ID = "requestId"
 )
 
@@ -44,11 +44,11 @@ func logInit(conf *LogConfig) error {
 
 func GetLog(ctx context.Context) *logrus.Entry {
 	var l *logrus.Entry
-	if ctx.Value(LOG_KEY_LOG_ID) != nil {
-		l = logrus.WithField(LOG_KEY_LOG_ID, ctx.Value("jobId"))
+	if ctx.Value(LOG_KEY_JOB_ID) != nil {
+		l = logrus.WithField(LOG_KEY_JOB_ID, ctx.Value(LOG_KEY_JOB_ID))
 	}
 	if ctx.Value(LOG_KEY_REQUEST_ID) != nil {
-		l = logrus.WithField(LOG_KEY_REQUEST_ID, ctx.Value("requestId"))
+		l = logrus.WithField(LOG_KEY_REQUEST_ID, ctx.Value(LOG_KEY_REQUEST_ID))
 	}
 	if l == nil {
 		l = logrus.NewEntry(logrus.StandardLogger())
