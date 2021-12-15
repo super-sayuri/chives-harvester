@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	bot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"sayuri_crypto_bot/conf"
@@ -33,7 +34,8 @@ func webhookRouter(r *gin.RouterGroup) {
 			NormalResponse(c, nil)
 			return
 		}
-		log.Info("get update: ", update)
+		updateStr, _ := json.Marshal(update)
+		log.Info("get update: ", updateStr)
 		if update.Message != nil {
 			handleTgbotMessage(c, update.Message)
 		}
@@ -50,7 +52,7 @@ func handleTgbotMessage(c context.Context, m *bot.Message) {
 	// command
 	if text[0] == '/' {
 		sls := strings.Split(text, " ")
-		cmd := sls[0]
+		cmd := getCommand(sls[0])
 		f, ok := commandFuncs[cmd]
 		if ok {
 			go f(newCtx, sls)
@@ -106,4 +108,9 @@ func realtimeCommand(ctx context.Context, params []string) {
 	msg, _ := util.TemplateGetString(util.TEMPLATE_REALTIME, nil)
 	sender.TgSendData(chat, msg)
 
+}
+
+func getCommand(cmd string) string {
+	sls := strings.Split(cmd, "@")
+	return sls[0]
 }
