@@ -25,7 +25,7 @@ func CryptoPrice(ctx context.Context) error {
 		Datetime: time.Now().Format("2006-01-02 15:04:05"),
 		Items:    markets,
 	}
-	msg, err := util.TemplateGetString(util.CRYPTO_TEMPLATE, output)
+	msg, err := util.TemplateGetString(util.TEMPLATE_CRYPTO, output)
 	if err != nil {
 		return err
 	}

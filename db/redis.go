@@ -2,8 +2,10 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"sayuri_crypto_bot/conf"
+	"time"
 )
 
 var (
@@ -26,4 +28,32 @@ func redisInit(config *conf.RedisConfig) error {
 
 func GetRedisDb() *redis.Client {
 	return _redis
+}
+
+func CheckUserAvailable(ctx context.Context, id int64) bool {
+	key := fmt.Sprintf("user_blacklist_%i", id)
+	_, err := _redis.Get(ctx, key).Result()
+	if err != nil {
+		return true
+	}
+	return false
+}
+
+func CheckChatAvailable(ctx context.Context, id int64) bool {
+	key := fmt.Sprintf("chat_blacklist_%i", id)
+	_, err := _redis.Get(ctx, key).Result()
+	if err != nil {
+		return true
+	}
+	return false
+}
+
+func AddUserPeriod(ctx context.Context, id int64) {
+	key := fmt.Sprintf("user_blacklist_%i", id)
+	_redis.Set(ctx, key, true, time.Second*time.Duration(conf.GetConfig().Tgbot.CallingGap))
+}
+
+func AddChatPeriod(ctx context.Context, id int64) {
+	key := fmt.Sprintf("chat_blacklist_%i", id)
+	_redis.Set(ctx, key, true, time.Second*time.Duration(conf.GetConfig().Tgbot.CallingGap))
 }

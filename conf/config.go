@@ -19,7 +19,8 @@ type Config struct {
 }
 
 type TemplateConfig struct {
-	Crypto string `yml:"crypto"`
+	BasePath string `yml:"bathpath"`
+	Crypto   string `yml:"crypto"`
 }
 
 type CommonConfig struct {
@@ -29,8 +30,9 @@ type CommonConfig struct {
 }
 
 type TgbotConfig struct {
-	Token string `yml:"token"`
-	Owner string `yml:"owner"`
+	Token      string `yml:"token"`
+	Owner      string `yml:"owner"`
+	CallingGap int    `yml:"call_gap"`
 }
 
 type CronConfig struct {

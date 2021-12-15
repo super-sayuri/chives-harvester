@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"sayuri_crypto_bot/conf"
@@ -23,8 +24,16 @@ func InitRouter(g *gin.Engine) error {
 	if err != nil {
 		return err
 	}
+	err = initCommandFuncMap()
+	if err != nil {
+		return err
+	}
 	g.Use(RequestLogger)
 	r := g.Group(routerMap[API_PREFIX])
+
+	webhookRouter(r)
+	commandRouter(r)
+
 	r.GET(routerMap[API_PING], func(c *gin.Context) {
 		NormalResponse(c, "pong")
 	})
@@ -58,11 +67,15 @@ func initRouterMap() (err error) {
 	}
 
 	// validate all router
-	routerKeys := []string{API_PREFIX, API_PING, API_META}
+	routerKeys := []string{API_PREFIX, API_PING, API_META, API_COMMAND, API_WEBHOOK}
+	missings := make([]string, 0)
 	for _, routerKey := range routerKeys {
 		if _, ok := routerMap[routerKey]; !ok {
-			return errors.New("no router config of " + routerKey + " in db")
+			missings = append(missings, routerKey)
 		}
+	}
+	if len(missings) != 0 {
+		return errors.New(fmt.Sprintf("missing router parameters in db: %v", missings))
 	}
 
 	return nil

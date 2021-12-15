@@ -8,7 +8,9 @@ import (
 	"os"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
+	"sayuri_crypto_bot/job"
 	"sayuri_crypto_bot/router"
+	"sayuri_crypto_bot/sender"
 	"sayuri_crypto_bot/util"
 )
 
@@ -41,8 +43,8 @@ func main() {
 		log.Fatal("error when init db: ", err)
 	}
 
-	//job.CronInit()
-	//sender.TgStartMessage(conf.GetConfig().Tgbot.Owner)
+	job.CronInit()
+	sender.TgStartMessage(conf.GetConfig().Tgbot.Owner)
 	gin.SetMode(conf.GetConfig().Service.GinMode)
 	g := gin.Default()
 	g.SetTrustedProxies(nil)
