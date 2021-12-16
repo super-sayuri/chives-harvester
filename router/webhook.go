@@ -80,9 +80,11 @@ func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(c
 		msg, _ := template.TemplateGetString(template.TEMPLATE_TOO_OFTEN, nil)
 		if !db.CheckUserAvailable(ctx, user) {
 			sender.TgSendData(user, msg)
+			return
 		}
 		if !db.CheckChatAvailable(ctx, chat) {
 			sender.TgSendData(user, msg)
+			return
 		}
 		f(ctx, params)
 	}

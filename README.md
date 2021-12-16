@@ -16,6 +16,7 @@
 
 ## todo
 * 支持在不同群发消息
+* show real ip in log
 * template和item的cache
 * db decouple
 ---
