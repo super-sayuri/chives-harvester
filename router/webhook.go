@@ -119,6 +119,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 	}
 	if len(params) != 2 {
 		sender.TgSendData(chat, infoMsg)
+		return
 	}
 
 	// crypto
