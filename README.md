@@ -15,10 +15,9 @@
 ```
 
 ## todo
-* ~~完善数据库储存~~
-* ~~update hook~~
-* ~~commands~~
 * 支持在不同群发消息
+* template和item的cache
+* db decouple
 ---
 * 同比环比警告
 

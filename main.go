@@ -11,7 +11,7 @@ import (
 	"sayuri_crypto_bot/job"
 	"sayuri_crypto_bot/router"
 	"sayuri_crypto_bot/sender"
-	"sayuri_crypto_bot/util"
+	"sayuri_crypto_bot/template"
 )
 
 var (
@@ -33,7 +33,7 @@ func main() {
 		os.Exit(200)
 	}
 
-	err = util.Init(conf.GetConfig())
+	err = template.Init(conf.GetConfig())
 	if err != nil {
 		log.Fatal("error when init util: ", err)
 	}

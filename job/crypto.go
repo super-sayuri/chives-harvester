@@ -7,7 +7,7 @@ import (
 	"sayuri_crypto_bot/fetcher"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
-	"sayuri_crypto_bot/util"
+	"sayuri_crypto_bot/template"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func CryptoPrice(ctx context.Context) error {
 		Datetime: time.Now().Format("2006-01-02 15:04:05"),
 		Items:    markets,
 	}
-	msg, err := util.TemplateGetString(util.TEMPLATE_CRYPTO, output)
+	msg, err := template.TemplateGetString(template.TEMPLATE_CRYPTO, output)
 	if err != nil {
 		return err
 	}

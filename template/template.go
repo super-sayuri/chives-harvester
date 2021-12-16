@@ -1,4 +1,4 @@
-package util
+package template
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ const (
 
 var _templateMap map[TemplateKey]*template.Template
 
-func templateInit(config *conf.Config) error {
+func Init(config *conf.Config) error {
 	_templateMap = make(map[TemplateKey]*template.Template, 0)
 	tmplToParse := []TemplateKey{TEMPLATE_CRYPTO, TEMPLATE_ABOUTME, TEMPLATE_REALTIME, TEMPLATE_TOO_OFTEN}
 	for _, tmplKey := range tmplToParse {

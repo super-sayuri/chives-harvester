@@ -6,6 +6,7 @@ import (
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/model"
 	"strconv"
+	"strings"
 )
 
 func GetGroupIds(ctx context.Context) (groupIds []int64, err error) {
@@ -44,4 +45,19 @@ func GetCryptoItems(ctx context.Context) ([]*model.GoodsItem, error) {
 		cryptoItems = append(cryptoItems, item)
 	}
 	return cryptoItems, nil
+}
+
+func GetCryptoItemById(ctx context.Context, id string) (*model.GoodsItem, error) {
+	rdb := GetRedisDb()
+	id = strings.ToLower(id)
+	cryptoDb, err := rdb.HGet(ctx, DB_KEY_CRYPTO_ITEMS, id).Result()
+	if err != nil {
+		return nil, err
+	}
+	item := &model.GoodsItem{}
+	err = json.Unmarshal([]byte(cryptoDb), item)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
 }
