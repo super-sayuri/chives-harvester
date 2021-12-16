@@ -32,8 +32,8 @@ func GetRedisDb() *redis.Client {
 
 func CheckUserAvailable(ctx context.Context, id int64) bool {
 	key := fmt.Sprintf("user_blacklist_%i", id)
-	_, err := _redis.Get(ctx, key).Result()
-	if err != nil {
+	res, err := _redis.Get(ctx, key).Result()
+	if err != nil || len(res) == 0 {
 		return true
 	}
 	return false
@@ -41,8 +41,8 @@ func CheckUserAvailable(ctx context.Context, id int64) bool {
 
 func CheckChatAvailable(ctx context.Context, id int64) bool {
 	key := fmt.Sprintf("chat_blacklist_%i", id)
-	_, err := _redis.Get(ctx, key).Result()
-	if err != nil {
+	res, err := _redis.Get(ctx, key).Result()
+	if err != nil || len(res) == 0 {
 		return true
 	}
 	return false
