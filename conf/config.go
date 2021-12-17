@@ -9,45 +9,45 @@ import (
 var _conf *Config
 
 type Config struct {
-	Common   *CommonConfig   `yml:"common"`
-	Template *TemplateConfig `yml:"template"`
-	Tgbot    *TgbotConfig    `yml:"tgbot"`
-	Cron     *CronConfig     `yml:"cron"`
-	Log      *LogConfig      `yml:"log"`
-	Redis    *RedisConfig    `yml:"redis"`
-	Service  *ServiceConfig  `yml:"service"`
+	Common   *CommonConfig   `yaml:"common"`
+	Template *TemplateConfig `yaml:"template"`
+	Tgbot    *TgbotConfig    `yaml:"tgbot"`
+	Cron     *CronConfig     `yaml:"cron"`
+	Log      *LogConfig      `yaml:"log"`
+	Redis    *RedisConfig    `yaml:"redis"`
+	Service  *ServiceConfig  `yaml:"service"`
 }
 
 type TemplateConfig struct {
-	BasePath string `yml:"bathpath"`
-	Crypto   string `yml:"crypto"`
+	BasePath string `yaml:"bathpath"`
+	Crypto   string `yaml:"crypto"`
 }
 
 type CommonConfig struct {
-	Lang       string `yml:"lang"`
-	EncKeyPath string `yml:"encryption_key_path"`
-	ConfigType string `yml:"config_type"`
+	Lang       string `yaml:"lang"`
+	EncKeyPath string `yaml:"encryption_key_path"`
+	ConfigType string `yaml:"config_type"`
 }
 
 type TgbotConfig struct {
-	Token      string `yml:"token"`
-	Owner      string `yml:"owner"`
-	CallingGap int    `yml:"call_gap"`
+	Token      string `yaml:"token"`
+	Owner      string `yaml:"owner"`
+	CallingGap int    `yaml:"call_gap"`
 }
 
 type CronConfig struct {
-	Crypto string `yml:"crypto"`
+	Crypto string `yaml:"crypto"`
 }
 
 type RedisConfig struct {
-	Nodes    string `yml:"nodes"`
-	Username string `yml:"username"`
-	Password string `yml:"password"`
+	Nodes    string `yaml:"nodes"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type ServiceConfig struct {
-	Port    string `yml:"port"`
-	GinMode string `yml:"gin_mode"`
+	Port    string `yaml:"port"`
+	GinMode string `yaml:"gin_mode"`
 }
 
 func InitConfig(path, keyPath string) error {

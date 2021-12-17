@@ -31,7 +31,7 @@ func GetRedisDb() *redis.Client {
 }
 
 func CheckUserAvailable(ctx context.Context, id int64) bool {
-	key := fmt.Sprintf("user_blacklist_%i", id)
+	key := fmt.Sprintf("user_blacklist_%d", id)
 	res, err := _redis.Get(ctx, key).Result()
 	if err != nil || len(res) == 0 {
 		return true
@@ -40,7 +40,7 @@ func CheckUserAvailable(ctx context.Context, id int64) bool {
 }
 
 func CheckChatAvailable(ctx context.Context, id int64) bool {
-	key := fmt.Sprintf("chat_blacklist_%i", id)
+	key := fmt.Sprintf("chat_blacklist_%d", id)
 	res, err := _redis.Get(ctx, key).Result()
 	if err != nil || len(res) == 0 {
 		return true
@@ -49,11 +49,11 @@ func CheckChatAvailable(ctx context.Context, id int64) bool {
 }
 
 func AddUserPeriod(ctx context.Context, id int64) {
-	key := fmt.Sprintf("user_blacklist_%i", id)
+	key := fmt.Sprintf("user_blacklist_%d", id)
 	_redis.Set(ctx, key, true, time.Second*time.Duration(conf.GetConfig().Tgbot.CallingGap))
 }
 
 func AddChatPeriod(ctx context.Context, id int64) {
-	key := fmt.Sprintf("chat_blacklist_%i", id)
+	key := fmt.Sprintf("chat_blacklist_%d", id)
 	_redis.Set(ctx, key, true, time.Second*time.Duration(conf.GetConfig().Tgbot.CallingGap))
 }
