@@ -17,13 +17,14 @@ const (
 	TEMPLATE_ABOUTME   = TemplateKey("aboutme")
 	TEMPLATE_REALTIME  = TemplateKey("realtime")
 	TEMPLATE_TOO_OFTEN = TemplateKey("too_often")
+	TEMPLATE_TAROT     = TemplateKey("tarot")
 )
 
 var _templateMap map[TemplateKey]*template.Template
 
 func Init(config *conf.Config) error {
 	_templateMap = make(map[TemplateKey]*template.Template, 0)
-	tmplToParse := []TemplateKey{TEMPLATE_CRYPTO, TEMPLATE_ABOUTME, TEMPLATE_REALTIME, TEMPLATE_TOO_OFTEN}
+	tmplToParse := []TemplateKey{TEMPLATE_CRYPTO, TEMPLATE_ABOUTME, TEMPLATE_REALTIME, TEMPLATE_TOO_OFTEN, TEMPLATE_TAROT}
 	for _, tmplKey := range tmplToParse {
 		if err := initSingleTemplate(tmplKey); err != nil {
 			return err

@@ -8,6 +8,7 @@ import (
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
 	"sayuri_crypto_bot/fetcher"
+	"sayuri_crypto_bot/fortune/tarot"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
 	"sayuri_crypto_bot/template"
@@ -23,6 +24,7 @@ func initCommandFuncMap() error {
 	commandFuncs = make(map[string]func(ctx context.Context, params []string), 0)
 	commandFuncs["/about"] = aboutCommand
 	commandFuncs["/realtime"] = checkUserChatAvailable(realtimeCommand)
+	commandFuncs["/tarot"] = checkUserChatAvailable(tarotCommand)
 
 	return nil
 }
@@ -158,4 +160,27 @@ func realtimeCommand(ctx context.Context, params []string) {
 func getCommand(cmd string) string {
 	sls := strings.Split(cmd, "@")
 	return sls[0]
+}
+
+func tarotCommand(ctx context.Context, params []string) {
+	log := conf.GetLog(ctx)
+	user, ok := ctx.Value("tg_user").(int64)
+	if !ok {
+		log.Error("cannot get telegram user id from context")
+		return
+	}
+	chat, ok := ctx.Value("tg_chat").(int64)
+	if !ok {
+		log.Error("cannot get telegram chat id from context")
+		return
+	}
+	card := tarot.Draw()
+	msg, err := template.TemplateGetString(template.TEMPLATE_TAROT, card)
+	if err != nil {
+		log.Error("error: ", err)
+		return
+	}
+	sender.TgSendData(chat, msg)
+	db.AddChatPeriod(ctx, chat)
+	db.AddUserPeriod(ctx, user)
 }

@@ -39,7 +39,7 @@ func TgStartMessage(ownerId string) error {
 		BaseChat: bot.BaseChat{
 			ChatID: int64(id),
 		},
-		Text: "天灾再起!",
+		Text: "天灾再起! " + conf.GetConfig().Common.Name,
 	}
 	_, err = tgbot.Send(c)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
+	"sayuri_crypto_bot/fortune"
 	"sayuri_crypto_bot/job"
 	"sayuri_crypto_bot/router"
 	"sayuri_crypto_bot/sender"
@@ -41,6 +42,11 @@ func main() {
 	err = db.Init(conf.GetConfig())
 	if err != nil {
 		log.Fatal("error when init db: ", err)
+	}
+
+	err = fortune.Init(conf.GetConfig())
+	if err != nil {
+		log.Fatal("error when init fortune: ", err)
 	}
 
 	job.CronInit()

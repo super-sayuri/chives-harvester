@@ -19,7 +19,7 @@ type Config struct {
 }
 
 type TemplateConfig struct {
-	BasePath string `yaml:"bathpath"`
+	BasePath string `yaml:"basepath"`
 	Crypto   string `yaml:"crypto"`
 }
 
@@ -27,6 +27,7 @@ type CommonConfig struct {
 	Lang       string `yaml:"lang"`
 	EncKeyPath string `yaml:"encryption_key_path"`
 	ConfigType string `yaml:"config_type"`
+	Name       string `yaml:"name"`
 }
 
 type TgbotConfig struct {

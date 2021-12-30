@@ -1,0 +1,5 @@
+v0.0.2 2021-12-30
+Tarot command
+
+v0.0.1 2021-12-15
+Init update
