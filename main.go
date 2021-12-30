@@ -53,7 +53,8 @@ func main() {
 	sender.TgStartMessage(conf.GetConfig().Tgbot.Owner)
 	gin.SetMode(conf.GetConfig().Service.GinMode)
 	g := gin.Default()
-	g.SetTrustedProxies(nil)
+	g.SetTrustedProxies([]string{"0.0.0.0/0"})
+	g.RemoteIPHeaders = []string{"X-Forwarded-For", "X-Real-IP"}
 	err = router.InitRouter(g)
 	if err != nil {
 		log.Fatal("error when init service: ", err)
