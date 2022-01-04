@@ -15,12 +15,12 @@
 ```
 
 ## todo
-* ~~show real ip in log~~
-* log file
+* ~~log file~~
 * 支持在不同群发消息
 * template和item的cache
-* db decouple
+* ~~db decouple~~
 ---
 * 同比环比警告
+* 模拟账户
 
 天灾再起!

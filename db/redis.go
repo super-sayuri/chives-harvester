@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/shopspring/decimal"
 	"sayuri_crypto_bot/conf"
 	"time"
 )
@@ -26,8 +27,8 @@ func redisInit(config *conf.RedisConfig) error {
 	return nil
 }
 
-func GetRedisDb() *redis.Client {
-	return _redis
+func GetApiRouter() (map[string]string, error) {
+	return _redis.HGetAll(context.Background(), DB_KEY_API_CONFIG).Result()
 }
 
 func CheckUserAvailable(ctx context.Context, id int64) bool {
@@ -56,4 +57,26 @@ func AddUserPeriod(ctx context.Context, id int64) {
 func AddChatPeriod(ctx context.Context, id int64) {
 	key := fmt.Sprintf("chat_blacklist_%d", id)
 	_redis.Set(ctx, key, true, time.Second*time.Duration(conf.GetConfig().Tgbot.CallingGap))
+}
+
+func SaveItemRecords(ctx context.Context, name string, value decimal.Decimal) {
+	key := fmt.Sprintf(DB_KEY_RECORD_FORMAT, name)
+	_redis.LPush(ctx, key, value.String())
+}
+
+func DeleteMoreRecords(ctx context.Context, id string, threhold int) error {
+	key := fmt.Sprintf(DB_KEY_RECORD_FORMAT, id)
+	records, err := _redis.LRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		return err
+	}
+	l := len(records)
+	for l > threhold {
+		_, err = _redis.RPop(ctx, key).Result()
+		if err != nil {
+			return err
+		}
+		l--
+	}
+	return nil
 }

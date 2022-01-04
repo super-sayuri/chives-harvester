@@ -28,8 +28,9 @@ func GeckoGetValue(items []*model.GoodsItem, currency string) ([]*model.MarketVa
 		return nil, err
 	}
 	res := make([]*model.MarketValue, 0)
-	for _, market := range *markets {
+	for i, market := range *markets {
 		res = append(res, &model.MarketValue{
+			ID:            ids[i],
 			Name:          market.Name,
 			Price:         decimal.NewFromFloat(market.CurrentPrice),
 			Currency:      currency,

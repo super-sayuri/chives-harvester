@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -60,8 +59,7 @@ func RequestLogger(c *gin.Context) {
 }
 
 func initRouterMap() (err error) {
-	redis := db.GetRedisDb()
-	routerMap, err = redis.HGetAll(context.Background(), db.DB_KEY_API_CONFIG).Result()
+	routerMap, err = db.GetApiRouter()
 	if err != nil {
 		return err
 	}

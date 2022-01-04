@@ -11,7 +11,7 @@ import (
 
 func GetGroupIds(ctx context.Context) (groupIds []int64, err error) {
 	log := conf.GetLog(ctx)
-	groups, err := GetRedisDb().LRange(ctx, DB_KEY_GROUPS, 0, -1).Result()
+	groups, err := _redis.LRange(ctx, DB_KEY_GROUPS, 0, -1).Result()
 	if err != nil {
 		return
 	}
@@ -29,8 +29,7 @@ func GetGroupIds(ctx context.Context) (groupIds []int64, err error) {
 
 func GetCryptoItems(ctx context.Context) ([]*model.GoodsItem, error) {
 	log := conf.GetLog(ctx)
-	rdb := GetRedisDb()
-	cryptoDb, err := rdb.HGetAll(ctx, DB_KEY_CRYPTO_ITEMS).Result()
+	cryptoDb, err := _redis.HGetAll(ctx, DB_KEY_CRYPTO_ITEMS).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -48,9 +47,8 @@ func GetCryptoItems(ctx context.Context) ([]*model.GoodsItem, error) {
 }
 
 func GetCryptoItemById(ctx context.Context, id string) (*model.GoodsItem, error) {
-	rdb := GetRedisDb()
 	id = strings.ToLower(id)
-	cryptoDb, err := rdb.HGet(ctx, DB_KEY_CRYPTO_ITEMS, id).Result()
+	cryptoDb, err := _redis.HGet(ctx, DB_KEY_CRYPTO_ITEMS, id).Result()
 	if err != nil {
 		return nil, err
 	}

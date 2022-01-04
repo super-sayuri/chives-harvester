@@ -8,9 +8,10 @@ import (
 )
 
 type LogConfig struct {
-	Format string `yml:"format"`
-	Output string `yml:"output"`
-	Level  string `yml:"level"`
+	Format string `yaml:"format"`
+	Output string `yaml:"output"`
+	Level  string `yaml:"level"`
+	Path   string `yaml:"path"`
 }
 
 const (
@@ -31,8 +32,18 @@ func logInit(conf *LogConfig) error {
 			FullTimestamp: true,
 		})
 	}
-	// todo add file output
-	logrus.SetOutput(os.Stdout)
+	if strings.ToUpper(conf.Output) == "FILE" {
+		if len(conf.Path) == 0 {
+			conf.Path = "syr.log"
+		}
+		f, err := os.OpenFile(conf.Path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+		if err != nil {
+			return err
+		}
+		logrus.SetOutput(f)
+	} else {
+		logrus.SetOutput(os.Stdout)
+	}
 	level, err := logrus.ParseLevel(conf.Level)
 	if err != nil {
 		return err

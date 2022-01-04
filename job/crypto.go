@@ -18,6 +18,7 @@ func CryptoPrice(ctx context.Context) error {
 		return err
 	}
 	markets, err := fetcher.GeckoGetUsdValue(cryotpItems)
+	go saveMarkets(ctx, markets)
 	if err != nil {
 		return err
 	}
@@ -42,4 +43,13 @@ func CryptoPrice(ctx context.Context) error {
 		}(groupId)
 	}
 	return nil
+}
+
+func saveMarkets(ctx context.Context, markets []*model.MarketValue) {
+	for _, market := range markets {
+		go func(m *model.MarketValue) {
+			fetcher.SaveItem(ctx, m)
+			fetcher.DeleteMoreItems(ctx, m.ID)
+		}(market)
+	}
 }
