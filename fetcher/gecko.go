@@ -13,10 +13,12 @@ func GeckoGetUsdValue(items []*model.GoodsItem) ([]*model.MarketValue, error) {
 
 func GeckoGetValue(items []*model.GoodsItem, currency string) ([]*model.MarketValue, error) {
 	ids := make([]string, 0)
+	rmap := make(map[string]string, 0)
 	for _, item := range items {
 		geckoId := item.GetAlias("gecko")
 		if len(geckoId) != 0 {
 			ids = append(ids, geckoId)
+			rmap[geckoId] = item.Id
 		}
 	}
 	if len(ids) == 0 {
@@ -28,9 +30,9 @@ func GeckoGetValue(items []*model.GoodsItem, currency string) ([]*model.MarketVa
 		return nil, err
 	}
 	res := make([]*model.MarketValue, 0)
-	for i, market := range *markets {
+	for _, market := range *markets {
 		res = append(res, &model.MarketValue{
-			ID:            ids[i],
+			ID:            rmap[market.Name],
 			Name:          market.Name,
 			Price:         decimal.NewFromFloat(market.CurrentPrice),
 			Currency:      currency,
