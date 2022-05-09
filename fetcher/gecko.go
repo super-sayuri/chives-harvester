@@ -5,7 +5,6 @@ import (
 	"github.com/shopspring/decimal"
 	gecko "github.com/superoo7/go-gecko/v3"
 	"sayuri_crypto_bot/model"
-	"strings"
 )
 
 func GeckoGetUsdValue(items []*model.GoodsItem) ([]*model.MarketValue, error) {
@@ -19,7 +18,7 @@ func GeckoGetValue(items []*model.GoodsItem, currency string) ([]*model.MarketVa
 		geckoId := item.GetAlias("gecko")
 		if len(geckoId) != 0 {
 			ids = append(ids, geckoId)
-			rmap[strings.ToLower(geckoId)] = item.Id
+			rmap[geckoId] = item.Id
 		}
 	}
 	if len(ids) == 0 {
@@ -33,7 +32,7 @@ func GeckoGetValue(items []*model.GoodsItem, currency string) ([]*model.MarketVa
 	res := make([]*model.MarketValue, 0)
 	for _, market := range *markets {
 		res = append(res, &model.MarketValue{
-			ID:            rmap[strings.ToLower(market.Name)],
+			ID:            rmap[market.Name],
 			Name:          market.Name,
 			Price:         decimal.NewFromFloat(market.CurrentPrice),
 			Currency:      currency,

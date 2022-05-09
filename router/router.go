@@ -1,25 +1,17 @@
 package router
 
 import (
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"sayuri_crypto_bot/conf"
-	"sayuri_crypto_bot/db"
+	"sayuri_crypto_bot/mgt/command"
+	"sayuri_crypto_bot/mgt/router"
 	"time"
 )
 
-var routerMap map[string]string
+//var routerMap map[string]string
 
-const (
-	API_PREFIX = "api_prefix"
-	API_PING   = "api_ping"
-	API_META   = "api_meta"
-)
-
-func InitRouter(g *gin.Engine) error {
-	err := initRouterMap()
+func InitRouter(g *gin.Engine) (err error) {
 	if err != nil {
 		return err
 	}
@@ -28,20 +20,13 @@ func InitRouter(g *gin.Engine) error {
 		return err
 	}
 	g.Use(RequestLogger)
-	r := g.Group(routerMap[API_PREFIX])
+	r := g.Group(router.GetUri(router.PrefixRouter))
 
 	webhookRouter(r)
-	commandRouter(r)
 
-	r.GET(routerMap[API_PING], func(c *gin.Context) {
-		NormalResponse(c, "pong")
-	})
-	r.GET(routerMap[API_META], getRouterMap)
+	command.ImplementRouter(r)
+	router.ImplementRouter(r)
 	return nil
-}
-
-func getRouterMap(c *gin.Context) {
-	NormalResponse(c, routerMap)
 }
 
 func RequestLogger(c *gin.Context) {
@@ -56,25 +41,4 @@ func RequestLogger(c *gin.Context) {
 	c.Next()
 	l.Info("Result: code ", c.Writer.Status(), ", size: ", c.Writer.Size())
 	l.Info("Req #", reqId, " ends at ", time.Now())
-}
-
-func initRouterMap() (err error) {
-	routerMap, err = db.GetApiRouter()
-	if err != nil {
-		return err
-	}
-
-	// validate all router
-	routerKeys := []string{API_PREFIX, API_PING, API_META, API_COMMAND, API_WEBHOOK}
-	missings := make([]string, 0)
-	for _, routerKey := range routerKeys {
-		if _, ok := routerMap[routerKey]; !ok {
-			missings = append(missings, routerKey)
-		}
-	}
-	if len(missings) != 0 {
-		return errors.New(fmt.Sprintf("missing router parameters in db: %v", missings))
-	}
-
-	return nil
 }

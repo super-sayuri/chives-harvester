@@ -9,14 +9,14 @@ import (
 	"sayuri_crypto_bot/db"
 	"sayuri_crypto_bot/fetcher"
 	"sayuri_crypto_bot/fortune/tarot"
+	"sayuri_crypto_bot/mgt/router"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
 	"sayuri_crypto_bot/template"
+	"sayuri_crypto_bot/util"
 	"strings"
 	"time"
 )
-
-const API_WEBHOOK = "api_webhook"
 
 var commandFuncs map[string]func(ctx context.Context, params []string)
 
@@ -30,9 +30,9 @@ func initCommandFuncMap() error {
 }
 
 func webhookRouter(r *gin.RouterGroup) {
-	r.POST(routerMap[API_WEBHOOK], func(c *gin.Context) {
+	r.POST(router.TgHookRouter, func(c *gin.Context) {
 		log := conf.GetLog(c)
-		defer NormalResponse(c, nil)
+		defer util.NormalResponse(c, nil)
 		tgbot, _ := bot.NewBotAPI(conf.GetConfig().Tgbot.Token)
 		update, err := tgbot.HandleUpdate(c.Request)
 		if err != nil {

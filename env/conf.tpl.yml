@@ -1,0 +1,35 @@
+common:
+  lang: "zh"
+  config_type: "file"
+  name: "local"
+
+service:
+  port: "8088"
+  gin_mode: "debug"
+
+template:
+  crypto: "tpl/crypto_cn.txt"
+  basepath: "./tpl"
+
+tgbot:
+  owner: "tg_owner_id"
+  token: "key_tgbot_token"
+  call_gap: 30
+
+cron:
+  crypto: "* * * * *"
+
+log:
+  level: "debug"
+  output: "std"
+  path: "./logs/a.log"
+
+redis:
+  nodes: "127.0.0.1:6379"
+  password: "redis_password"
+
+database:
+  driver: "DATABASE_DRIVER"
+  url: "DATABASE_URL"
+  username: "USERNAME"
+  password: "db_password"

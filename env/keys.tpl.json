@@ -1,0 +1,6 @@
+{
+  "key_tgbot_token": "TELEGRAM_BOT_TOKEN",
+  "tg_owner_id": "TELEGRAM_OWNER_ID",
+  "redis_password": "REDIS_PASSWORD",
+  "db_password": "DB_PASSWORD"
+}

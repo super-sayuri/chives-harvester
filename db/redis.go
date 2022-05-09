@@ -27,10 +27,6 @@ func redisInit(config *conf.RedisConfig) error {
 	return nil
 }
 
-func GetApiRouter() (map[string]string, error) {
-	return _redis.HGetAll(context.Background(), DB_KEY_API_CONFIG).Result()
-}
-
 func CheckUserAvailable(ctx context.Context, id int64) bool {
 	key := fmt.Sprintf("user_blacklist_%d", id)
 	res, err := _redis.Get(ctx, key).Result()
@@ -79,4 +75,13 @@ func DeleteMoreRecords(ctx context.Context, id string, threhold int) error {
 		l--
 	}
 	return nil
+}
+
+func SaveTgbotCommands(ctx context.Context, cs string) error {
+	return _redis.Set(ctx, REDIS_KEY_TG_COMMAND, cs,
+		time.Minute*time.Duration(conf.GetConfig().Tgbot.CallingGap)).Err()
+}
+
+func GetTgbotCommands(ctx context.Context) (string, error) {
+	return _redis.Get(ctx, REDIS_KEY_TG_COMMAND).Result()
 }

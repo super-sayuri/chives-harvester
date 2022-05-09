@@ -16,6 +16,7 @@ type Config struct {
 	Log      *LogConfig      `yaml:"log"`
 	Redis    *RedisConfig    `yaml:"redis"`
 	Service  *ServiceConfig  `yaml:"service"`
+	Db       *DbConfig       `yaml:"database"`
 }
 
 type TemplateConfig struct {
@@ -49,6 +50,13 @@ type RedisConfig struct {
 type ServiceConfig struct {
 	Port    string `yaml:"port"`
 	GinMode string `yaml:"gin_mode"`
+}
+
+type DbConfig struct {
+	Driver   string `yaml:"driver"`
+	Url      string `yaml:"url"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 func InitConfig(path, keyPath string) error {
@@ -93,16 +101,8 @@ func configFromFile(keyPath string) error {
 }
 
 func setKeyValues(conf *Config, keys map[string]string) {
-	newStr, ok := keys[conf.Tgbot.Token]
-	if ok {
-		conf.Tgbot.Token = newStr
-	}
-	newStr, ok = keys[conf.Tgbot.Owner]
-	if ok {
-		conf.Tgbot.Owner = newStr
-	}
-	newStr, ok = keys[conf.Redis.Password]
-	if ok {
-		conf.Redis.Password = newStr
-	}
+	conf.Tgbot.Token = keys[conf.Tgbot.Token]
+	conf.Tgbot.Owner = keys[conf.Tgbot.Owner]
+	conf.Redis.Password = keys[conf.Redis.Password]
+	conf.Db.Password = keys[conf.Db.Password]
 }
