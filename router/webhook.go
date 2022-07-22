@@ -2,9 +2,8 @@ package router
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/gin-gonic/gin"
 	bot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/google/uuid"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
 	"sayuri_crypto_bot/fetcher"
@@ -16,36 +15,36 @@ import (
 	"time"
 )
 
-const API_WEBHOOK = "api_webhook"
-
 var commandFuncs map[string]func(ctx context.Context, params []string)
 
-func initCommandFuncMap() error {
-	commandFuncs = make(map[string]func(ctx context.Context, params []string), 0)
+func initCommandFuncMap() {
+	commandFuncs = make(map[string]func(ctx context.Context, params []string), 3)
 	commandFuncs["/about"] = aboutCommand
 	commandFuncs["/realtime"] = checkUserChatAvailable(realtimeCommand)
 	commandFuncs["/tarot"] = checkUserChatAvailable(tarotCommand)
-
-	return nil
 }
 
-func webhookRouter(r *gin.RouterGroup) {
-	r.POST(routerMap[API_WEBHOOK], func(c *gin.Context) {
-		log := conf.GetLog(c)
-		defer NormalResponse(c, nil)
-		tgbot, _ := bot.NewBotAPI(conf.GetConfig().Tgbot.Token)
-		update, err := tgbot.HandleUpdate(c.Request)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		updateStr, _ := json.Marshal(update)
-		log.Info("get update: ", string(updateStr))
-		if update.Message != nil {
-			handleTgbotMessage(c, update.Message)
-		}
-	})
+func HandleCommands() {
+
+	initCommandFuncMap()
+
+	tgbot, err := bot.NewBotAPI(conf.GetConfig().Tgbot.Token)
+	if err != nil {
+		panic(err)
+	}
+
+	updateConfig := bot.NewUpdate(0)
+	updateConfig.Timeout = 60
+
+	updates := tgbot.GetUpdatesChan(updateConfig)
+
+	for update := range updates {
+		ctx := context.Background()
+		context.WithValue(ctx, conf.LOG_KEY_REQUEST_ID, uuid.NewString())
+		go handleTgbotMessage(ctx, update.Message)
+	}
 }
+
 func handleTgbotMessage(c context.Context, m *bot.Message) {
 	log := conf.GetLog(c)
 	user := m.From
