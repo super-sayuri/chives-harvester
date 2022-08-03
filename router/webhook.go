@@ -50,6 +50,9 @@ func handleTgbotMessage(c context.Context, m *bot.Message) {
 	user := m.From
 	chat := m.Chat
 	text := m.Text
+	if len(text) == 0 {
+		return
+	}
 	newCtx := context.WithValue(c, "tg_user", user.ID)
 	newCtx = context.WithValue(newCtx, "tg_chat", chat.ID)
 	// command
