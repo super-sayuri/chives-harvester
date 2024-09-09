@@ -1,0 +1,34 @@
+common:
+  lang: "zh"
+  config_type: "file"
+  name: "local"
+
+service:
+  port: "18999"
+  gin_mode: "release"
+
+template:
+  basepath: "./assets/tpl"
+
+tgbot:
+  owner: "tg_owner_id"
+  token: "key_tgbot_token"
+  call_gap: 30
+
+cron:
+  crypto: "0 8,20 * * *"
+
+log:
+  level: "info"
+  output: "standard"
+  format: "standard"
+  path: "N/A"
+
+redis:
+  nodes: "127.0.0.1:6379"
+  password: "redis_password"
+
+crypto:
+  app: "gecko"
+  currency: "rmb"
+  token: "crypto_token"

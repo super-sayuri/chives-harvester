@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
-	"sayuri_crypto_bot/fetcher"
+	cryptoFetcher "sayuri_crypto_bot/fetcher/crypto"
 	"sayuri_crypto_bot/fortune/tarot"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
@@ -81,7 +81,7 @@ func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(c
 			log.Error("cannot get telegram chat id from context")
 			return
 		}
-		msg, _ := template.TemplateGetString(template.TEMPLATE_TOO_OFTEN, nil)
+		msg, _ := template.GetString(template.TooOften, nil)
 		if !db.CheckUserAvailable(ctx, user) {
 			sender.TgSendData(chat, msg)
 			return
@@ -101,7 +101,7 @@ func aboutCommand(ctx context.Context, params []string) {
 		log.Error("cannot get telegram chat id from context")
 		return
 	}
-	msg, _ := template.TemplateGetString(template.TEMPLATE_ABOUTME, nil)
+	msg, _ := template.GetString(template.Aboutme, nil)
 	sender.TgSendData(chat, msg)
 }
 
@@ -118,7 +118,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 		return
 	}
 
-	infoMsg, err := template.TemplateGetString(template.TEMPLATE_REALTIME, nil)
+	infoMsg, err := template.GetString(template.Realtime, nil)
 	if err != nil {
 		log.Error("error: ", err)
 		return
@@ -135,7 +135,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 	}
 	if item != nil {
 		items := []*model.GoodsItem{item}
-		markets, err := fetcher.GeckoGetUsdValue(items)
+		markets, err := cryptoFetcher.GetCryptoFetcher().GetValue(items)
 		if err != nil {
 			log.Info("error: ", err)
 			return
@@ -144,7 +144,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 			Datetime: time.Now().Format("2006-01-02 15:04:05"),
 			Items:    markets,
 		}
-		msg, err := template.TemplateGetString(template.TEMPLATE_CRYPTO, output)
+		msg, err := template.GetString(template.Crypto, output)
 		if err != nil {
 			log.Error("error: ", err)
 			return
@@ -177,7 +177,7 @@ func tarotCommand(ctx context.Context, params []string) {
 		return
 	}
 	card := tarot.Draw()
-	msg, err := template.TemplateGetString(template.TEMPLATE_TAROT, card)
+	msg, err := template.GetString(template.Tarot, card)
 	if err != nil {
 		log.Error("error: ", err)
 		return

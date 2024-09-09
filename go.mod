@@ -1,6 +1,6 @@
 module sayuri_crypto_bot
 
-go 1.16
+go 1.22
 
 require (
 	github.com/go-redis/redis/v8 v8.11.4
@@ -12,7 +12,6 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/superoo7/go-gecko v1.0.0
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
