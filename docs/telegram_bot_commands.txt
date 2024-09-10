@@ -1,0 +1,4 @@
+about - 关于此机器人
+realtime - 实时报价
+tarot - 抽一张塔罗牌
+sticker - 随机发一张表情包

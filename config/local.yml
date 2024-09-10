@@ -13,13 +13,13 @@ template:
 tgbot:
   owner: "tg_owner_id"
   token: "key_tgbot_token"
-  call_gap: 30
+  call_gap: 5
 
 cron:
   crypto: "0 8,20 * * *"
 
 log:
-  level: "info"
+  level: "debug"
   output: "standard"
   format: "standard"
   path: "N/A"
@@ -29,6 +29,6 @@ redis:
   password: "redis_password"
 
 crypto:
-  app: "gecko"
-  currency: "rmb"
+  app: "binance"
+  currency: "usdt"
   token: "crypto_token"

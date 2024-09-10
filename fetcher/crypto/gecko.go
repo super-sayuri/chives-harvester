@@ -6,7 +6,6 @@ package crypto
 import (
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/model"
-	"sync"
 )
 
 type GeckoFetcher struct {
@@ -26,10 +25,8 @@ var _ Fetcher = (*GeckoFetcher)(nil)
 var _geckoFetcher *GeckoFetcher
 
 func NewGeckoFetcher(conf *conf.CryptoConfig) Fetcher {
-	sync.OnceFunc(func() {
-		_geckoFetcher = &GeckoFetcher{
-			currency: conf.Currency,
-		}
-	})
+	_geckoFetcher = &GeckoFetcher{
+		currency: conf.Currency,
+	}
 	return _geckoFetcher
 }

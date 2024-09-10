@@ -41,6 +41,10 @@ func CryptoPrice(ctx context.Context) error {
 			if err != nil {
 				log.Error("error when sending telegram message: ", err)
 			}
+			err = sender.TgSendSticker(i)
+			if err != nil {
+				log.Error("error when sending telegram stickers: ", err)
+			}
 		}(groupId)
 	}
 	return nil

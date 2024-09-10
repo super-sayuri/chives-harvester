@@ -21,7 +21,8 @@ func initCommandFuncMap() {
 	commandFuncs = make(map[string]func(ctx context.Context, params []string), 3)
 	commandFuncs["/about"] = aboutCommand
 	commandFuncs["/realtime"] = checkUserChatAvailable(realtimeCommand)
-	commandFuncs["/tarot"] = checkUserChatAvailable(tarotCommand)
+	commandFuncs["/tarot"] = checkUserAvailable(tarotCommand)
+	commandFuncs["/sticker"] = sendSticker
 }
 
 func HandleCommands() {
@@ -47,6 +48,7 @@ func HandleCommands() {
 
 func handleTgbotMessage(c context.Context, m *bot.Message) {
 	log := conf.GetLog(c)
+	log.Debugf("message: %+v\n", *m)
 	user := m.From
 	chat := m.Chat
 	text := m.Text
@@ -68,7 +70,7 @@ func handleTgbotMessage(c context.Context, m *bot.Message) {
 	}
 }
 
-func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+func checkUserAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
 	return func(ctx context.Context, params []string) {
 		log := conf.GetLog(ctx)
 		user, ok := ctx.Value("tg_user").(int64)
@@ -77,21 +79,38 @@ func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(c
 			return
 		}
 		chat, ok := ctx.Value("tg_chat").(int64)
+		if !db.CheckUserAvailable(ctx, user) {
+			msg, _ := template.GetString(template.TooOften, nil)
+			if ok {
+				sender.TgSendData(chat, msg)
+			} else {
+				sender.TgSendData(user, msg)
+			}
+			return
+		}
+		f(ctx, params)
+	}
+}
+
+func checkChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+	return func(ctx context.Context, params []string) {
+		log := conf.GetLog(ctx)
+		chat, ok := ctx.Value("tg_chat").(int64)
 		if !ok {
 			log.Error("cannot get telegram chat id from context")
 			return
 		}
-		msg, _ := template.GetString(template.TooOften, nil)
-		if !db.CheckUserAvailable(ctx, user) {
-			sender.TgSendData(chat, msg)
-			return
-		}
 		if !db.CheckChatAvailable(ctx, chat) {
+			msg, _ := template.GetString(template.TooOften, nil)
 			sender.TgSendData(chat, msg)
 			return
 		}
 		f(ctx, params)
 	}
+}
+
+func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+	return checkUserAvailable(checkChatAvailable(f))
 }
 
 func aboutCommand(ctx context.Context, params []string) {
@@ -185,4 +204,14 @@ func tarotCommand(ctx context.Context, params []string) {
 	sender.TgSendData(chat, msg)
 	db.AddChatPeriod(ctx, chat)
 	db.AddUserPeriod(ctx, user)
+}
+
+func sendSticker(ctx context.Context, params []string) {
+	log := conf.GetLog(ctx)
+	chat, ok := ctx.Value("tg_chat").(int64)
+	if !ok {
+		log.Error("cannot get telegram chat id from context")
+		return
+	}
+	sender.TgSendSticker(chat)
 }

@@ -8,10 +8,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sayuri_crypto_bot/client"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/model"
 	"strings"
-	"sync"
 )
 
 /**
@@ -94,13 +94,11 @@ var _ Fetcher = (*CmcFetcher)(nil)
 var _cmcFetcher *CmcFetcher
 
 func NewCmcFetcher(conf *conf.CryptoConfig) Fetcher {
-	sync.OnceFunc(func() {
-		_cmcFetcher = &CmcFetcher{
-			token:    conf.Token,
-			currency: conf.Currency,
-			client:   &http.Client{},
-		}
-	})
+	_cmcFetcher = &CmcFetcher{
+		token:    conf.Token,
+		currency: conf.Currency,
+		client:   client.GetDefaultHttpClient(),
+	}
 	return _cmcFetcher
 }
 

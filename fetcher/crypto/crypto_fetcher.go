@@ -13,16 +13,18 @@ type Fetcher interface {
 
 var _cryptoFetcher Fetcher
 
-var cyrptoInitMap map[string]func(conf *conf.CryptoConfig) Fetcher
+var cryptoInitMap map[string]func(conf *conf.CryptoConfig) Fetcher
 
 func initCryptoInitMap() {
-	cyrptoInitMap["gecko"] = NewGeckoFetcher
-	cyrptoInitMap["cmc"] = NewCmcFetcher
+	cryptoInitMap = make(map[string]func(conf *conf.CryptoConfig) Fetcher)
+	cryptoInitMap["gecko"] = NewGeckoFetcher
+	cryptoInitMap["cmc"] = NewCmcFetcher
+	cryptoInitMap["binance"] = NewBinanceFetcher
 }
 
 func InitCryptoFetcher(conf *conf.CryptoConfig) error {
 	initCryptoInitMap()
-	f, ok := cyrptoInitMap[conf.App]
+	f, ok := cryptoInitMap[conf.App]
 	if !ok {
 		return errors.New("no Crypto Fetcher found")
 	}

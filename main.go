@@ -7,6 +7,7 @@ import (
 	"os"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
+	"sayuri_crypto_bot/fetcher/crypto"
 	"sayuri_crypto_bot/fortune"
 	"sayuri_crypto_bot/job"
 	"sayuri_crypto_bot/router"
@@ -46,6 +47,11 @@ func main() {
 	err = fortune.Init(conf.GetConfig())
 	if err != nil {
 		log.Fatal("error when init fortune: ", err)
+	}
+
+	err = crypto.InitCryptoFetcher(conf.GetConfig().Crypto)
+	if err != nil {
+		log.Fatal("error when init crypto fetcher: ", err)
 	}
 
 	job.CronInit()
