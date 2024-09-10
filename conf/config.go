@@ -3,7 +3,7 @@ package conf
 import (
 	"encoding/json"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"os"
 )
 
 var _conf *Config
@@ -16,11 +16,11 @@ type Config struct {
 	Log      *LogConfig      `yaml:"log"`
 	Redis    *RedisConfig    `yaml:"redis"`
 	Service  *ServiceConfig  `yaml:"service"`
+	Crypto   *CryptoConfig   `yaml:"crypto"`
 }
 
 type TemplateConfig struct {
 	BasePath string `yaml:"basepath"`
-	Crypto   string `yaml:"crypto"`
 }
 
 type CommonConfig struct {
@@ -51,8 +51,14 @@ type ServiceConfig struct {
 	GinMode string `yaml:"gin_mode"`
 }
 
+type CryptoConfig struct {
+	App      string `yaml:"app"`
+	Currency string `yaml:"currency"`
+	Token    string `yaml:"token"`
+}
+
 func InitConfig(path, keyPath string) error {
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -75,7 +81,7 @@ func GetConfig() *Config {
 func configFromFile(keyPath string) error {
 
 	keys := make(map[string]string, 0)
-	file, err := ioutil.ReadFile(keyPath)
+	file, err := os.ReadFile(keyPath)
 	if err != nil {
 		return err
 	}
@@ -104,5 +110,9 @@ func setKeyValues(conf *Config, keys map[string]string) {
 	newStr, ok = keys[conf.Redis.Password]
 	if ok {
 		conf.Redis.Password = newStr
+	}
+	newStr, ok = keys[conf.Crypto.Token]
+	if ok {
+		conf.Crypto.Token = newStr
 	}
 }

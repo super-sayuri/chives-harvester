@@ -1,3 +1,13 @@
+v0.0.4 2024-09-09
+Update go version to 1.21
+Update the source of crypto.
+Improve the project structure.
+Can send KURIMI sticker.
+go 的版本升级到2.21
+更新加密货币信息源。
+改进项目结构。
+可以发送久留美表情包。
+
 v0.0.3 2022-01-??
 strategy: Two Moving Averages
 

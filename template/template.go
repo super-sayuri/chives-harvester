@@ -10,21 +10,21 @@ import (
 	"text/template"
 )
 
-type TemplateKey string
+type Key string
 
 const (
-	TEMPLATE_CRYPTO    = TemplateKey("crypto")
-	TEMPLATE_ABOUTME   = TemplateKey("aboutme")
-	TEMPLATE_REALTIME  = TemplateKey("realtime")
-	TEMPLATE_TOO_OFTEN = TemplateKey("too_often")
-	TEMPLATE_TAROT     = TemplateKey("tarot")
+	Crypto   = Key("crypto")
+	Aboutme  = Key("aboutme")
+	Realtime = Key("realtime")
+	TooOften = Key("too_often")
+	Tarot    = Key("tarot")
 )
 
-var _templateMap map[TemplateKey]*template.Template
+var _templateMap map[Key]*template.Template
 
 func Init(config *conf.Config) error {
-	_templateMap = make(map[TemplateKey]*template.Template, 0)
-	tmplToParse := []TemplateKey{TEMPLATE_CRYPTO, TEMPLATE_ABOUTME, TEMPLATE_REALTIME, TEMPLATE_TOO_OFTEN, TEMPLATE_TAROT}
+	_templateMap = make(map[Key]*template.Template, 0)
+	tmplToParse := []Key{Crypto, Aboutme, Realtime, TooOften, Tarot}
 	for _, tmplKey := range tmplToParse {
 		if err := initSingleTemplate(tmplKey); err != nil {
 			return err
@@ -33,7 +33,7 @@ func Init(config *conf.Config) error {
 	return nil
 }
 
-func initSingleTemplate(key TemplateKey) error {
+func initSingleTemplate(key Key) error {
 	config := conf.GetConfig()
 	path := fmt.Sprintf("%s/%s_%s.tpl", config.Template.BasePath, string(key), strings.ToLower(config.Common.Lang))
 	data, err := ioutil.ReadFile(path)
@@ -48,7 +48,7 @@ func initSingleTemplate(key TemplateKey) error {
 	return nil
 }
 
-func TemplateGetString(key TemplateKey, params interface{}) (string, error) {
+func GetString(key Key, params interface{}) (string, error) {
 	tmpl, ok := _templateMap[key]
 	if !ok {
 		return "", errors.New("cannot find template by key")

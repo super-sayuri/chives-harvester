@@ -6,7 +6,7 @@
 
 ### build
 ```bash
-./cmd/build.sh
+./build/build.sh
 ```
 
 ### 运行
@@ -15,12 +15,11 @@
 ```
 
 ## todo
-* ~~log file~~
 * 支持在不同群发消息
 * template和item的cache
-* ~~db decouple~~
 ---
 * 同比环比警告
 * 模拟账户
 
-天灾再起!
+## 帮忙买杯奶茶:
+ETH/BNB/OKB: 0x5c4051394b99348405FCE648b29d3D4c56073B72

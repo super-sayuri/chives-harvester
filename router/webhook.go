@@ -2,12 +2,11 @@ package router
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/gin-gonic/gin"
 	bot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/google/uuid"
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
-	"sayuri_crypto_bot/fetcher"
+	cryptoFetcher "sayuri_crypto_bot/fetcher/crypto"
 	"sayuri_crypto_bot/fortune/tarot"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
@@ -16,41 +15,46 @@ import (
 	"time"
 )
 
-const API_WEBHOOK = "api_webhook"
-
 var commandFuncs map[string]func(ctx context.Context, params []string)
 
-func initCommandFuncMap() error {
-	commandFuncs = make(map[string]func(ctx context.Context, params []string), 0)
+func initCommandFuncMap() {
+	commandFuncs = make(map[string]func(ctx context.Context, params []string), 3)
 	commandFuncs["/about"] = aboutCommand
 	commandFuncs["/realtime"] = checkUserChatAvailable(realtimeCommand)
-	commandFuncs["/tarot"] = checkUserChatAvailable(tarotCommand)
-
-	return nil
+	commandFuncs["/tarot"] = checkUserAvailable(tarotCommand)
+	commandFuncs["/sticker"] = sendSticker
 }
 
-func webhookRouter(r *gin.RouterGroup) {
-	r.POST(routerMap[API_WEBHOOK], func(c *gin.Context) {
-		log := conf.GetLog(c)
-		defer NormalResponse(c, nil)
-		tgbot, _ := bot.NewBotAPI(conf.GetConfig().Tgbot.Token)
-		update, err := tgbot.HandleUpdate(c.Request)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		updateStr, _ := json.Marshal(update)
-		log.Info("get update: ", string(updateStr))
-		if update.Message != nil {
-			handleTgbotMessage(c, update.Message)
-		}
-	})
+func HandleCommands() {
+
+	initCommandFuncMap()
+
+	tgbot, err := bot.NewBotAPI(conf.GetConfig().Tgbot.Token)
+	if err != nil {
+		panic(err)
+	}
+
+	updateConfig := bot.NewUpdate(0)
+	updateConfig.Timeout = 60
+
+	updates := tgbot.GetUpdatesChan(updateConfig)
+
+	for update := range updates {
+		ctx := context.Background()
+		context.WithValue(ctx, conf.LOG_KEY_REQUEST_ID, uuid.NewString())
+		go handleTgbotMessage(ctx, update.Message)
+	}
 }
+
 func handleTgbotMessage(c context.Context, m *bot.Message) {
 	log := conf.GetLog(c)
+	log.Debugf("message: %+v\n", *m)
 	user := m.From
 	chat := m.Chat
 	text := m.Text
+	if len(text) == 0 {
+		return
+	}
 	newCtx := context.WithValue(c, "tg_user", user.ID)
 	newCtx = context.WithValue(newCtx, "tg_chat", chat.ID)
 	// command
@@ -66,7 +70,7 @@ func handleTgbotMessage(c context.Context, m *bot.Message) {
 	}
 }
 
-func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+func checkUserAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
 	return func(ctx context.Context, params []string) {
 		log := conf.GetLog(ctx)
 		user, ok := ctx.Value("tg_user").(int64)
@@ -75,21 +79,38 @@ func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(c
 			return
 		}
 		chat, ok := ctx.Value("tg_chat").(int64)
+		if !db.CheckUserAvailable(ctx, user) {
+			msg, _ := template.GetString(template.TooOften, nil)
+			if ok {
+				sender.TgSendData(chat, msg)
+			} else {
+				sender.TgSendData(user, msg)
+			}
+			return
+		}
+		f(ctx, params)
+	}
+}
+
+func checkChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+	return func(ctx context.Context, params []string) {
+		log := conf.GetLog(ctx)
+		chat, ok := ctx.Value("tg_chat").(int64)
 		if !ok {
 			log.Error("cannot get telegram chat id from context")
 			return
 		}
-		msg, _ := template.TemplateGetString(template.TEMPLATE_TOO_OFTEN, nil)
-		if !db.CheckUserAvailable(ctx, user) {
-			sender.TgSendData(chat, msg)
-			return
-		}
 		if !db.CheckChatAvailable(ctx, chat) {
+			msg, _ := template.GetString(template.TooOften, nil)
 			sender.TgSendData(chat, msg)
 			return
 		}
 		f(ctx, params)
 	}
+}
+
+func checkUserChatAvailable(f func(ctx context.Context, params []string)) func(ctx context.Context, params []string) {
+	return checkUserAvailable(checkChatAvailable(f))
 }
 
 func aboutCommand(ctx context.Context, params []string) {
@@ -99,7 +120,7 @@ func aboutCommand(ctx context.Context, params []string) {
 		log.Error("cannot get telegram chat id from context")
 		return
 	}
-	msg, _ := template.TemplateGetString(template.TEMPLATE_ABOUTME, nil)
+	msg, _ := template.GetString(template.Aboutme, nil)
 	sender.TgSendData(chat, msg)
 }
 
@@ -116,7 +137,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 		return
 	}
 
-	infoMsg, err := template.TemplateGetString(template.TEMPLATE_REALTIME, nil)
+	infoMsg, err := template.GetString(template.Realtime, nil)
 	if err != nil {
 		log.Error("error: ", err)
 		return
@@ -133,7 +154,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 	}
 	if item != nil {
 		items := []*model.GoodsItem{item}
-		markets, err := fetcher.GeckoGetUsdValue(items)
+		markets, err := cryptoFetcher.GetCryptoFetcher().GetValue(items)
 		if err != nil {
 			log.Info("error: ", err)
 			return
@@ -142,7 +163,7 @@ func realtimeCommand(ctx context.Context, params []string) {
 			Datetime: time.Now().Format("2006-01-02 15:04:05"),
 			Items:    markets,
 		}
-		msg, err := template.TemplateGetString(template.TEMPLATE_CRYPTO, output)
+		msg, err := template.GetString(template.Crypto, output)
 		if err != nil {
 			log.Error("error: ", err)
 			return
@@ -175,7 +196,7 @@ func tarotCommand(ctx context.Context, params []string) {
 		return
 	}
 	card := tarot.Draw()
-	msg, err := template.TemplateGetString(template.TEMPLATE_TAROT, card)
+	msg, err := template.GetString(template.Tarot, card)
 	if err != nil {
 		log.Error("error: ", err)
 		return
@@ -183,4 +204,14 @@ func tarotCommand(ctx context.Context, params []string) {
 	sender.TgSendData(chat, msg)
 	db.AddChatPeriod(ctx, chat)
 	db.AddUserPeriod(ctx, user)
+}
+
+func sendSticker(ctx context.Context, params []string) {
+	log := conf.GetLog(ctx)
+	chat, ok := ctx.Value("tg_chat").(int64)
+	if !ok {
+		log.Error("cannot get telegram chat id from context")
+		return
+	}
+	sender.TgSendSticker(chat)
 }

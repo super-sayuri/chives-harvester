@@ -5,6 +5,7 @@ import (
 	"sayuri_crypto_bot/conf"
 	"sayuri_crypto_bot/db"
 	"sayuri_crypto_bot/fetcher"
+	cryptoFetcher "sayuri_crypto_bot/fetcher/crypto"
 	"sayuri_crypto_bot/model"
 	"sayuri_crypto_bot/sender"
 	"sayuri_crypto_bot/template"
@@ -13,11 +14,11 @@ import (
 
 func CryptoPrice(ctx context.Context) error {
 	log := conf.GetLog(ctx)
-	cryotpItems, err := db.GetCryptoItems(ctx)
+	cryptoItems, err := db.GetCryptoItems(ctx)
 	if err != nil {
 		return err
 	}
-	markets, err := fetcher.GeckoGetUsdValue(cryotpItems)
+	markets, err := cryptoFetcher.GetCryptoFetcher().GetValue(cryptoItems)
 	go saveMarkets(ctx, markets)
 	if err != nil {
 		return err
@@ -26,7 +27,7 @@ func CryptoPrice(ctx context.Context) error {
 		Datetime: time.Now().Format("2006-01-02 15:04:05"),
 		Items:    markets,
 	}
-	msg, err := template.TemplateGetString(template.TEMPLATE_CRYPTO, output)
+	msg, err := template.GetString(template.Crypto, output)
 	if err != nil {
 		return err
 	}
@@ -39,6 +40,10 @@ func CryptoPrice(ctx context.Context) error {
 			err := sender.TgSendData(i, msg)
 			if err != nil {
 				log.Error("error when sending telegram message: ", err)
+			}
+			err = sender.TgSendSticker(i)
+			if err != nil {
+				log.Error("error when sending telegram stickers: ", err)
 			}
 		}(groupId)
 	}
